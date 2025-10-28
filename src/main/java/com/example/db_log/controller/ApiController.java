@@ -1,10 +1,9 @@
 package com.example.db_log.controller;
 
-import com.example.db_log.domain.SensitiveData;
-import com.example.db_log.domain.User;
-import com.example.db_log.repository.SensitiveDataRepository;
-import com.example.db_log.repository.UserRepository;
-import jakarta.annotation.PostConstruct;
+import com.example.db_log.domain.Orders;
+import com.example.db_log.domain.Product;
+import com.example.db_log.repository.OrdersRepository;
+import com.example.db_log.repository.ProductRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -16,49 +15,58 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ApiController {
 
-    private final UserRepository userRepository;
-    private final SensitiveDataRepository sensitiveDataRepository;
+    private final ProductRepository productRepository;
+    private final OrdersRepository ordersRepository;
 
-    @PostConstruct
-    public void init() {
-        // 초기 데이터 생성 (최초 실행 시에만 동작)
-        if (userRepository.count() == 0) {
-            for (int i = 0; i < 100; i++) {
-                User user = new User("user" + i, "password" + i);
-                userRepository.save(user);
-                sensitiveDataRepository.save(new SensitiveData(user, "sensitive_data_" + i));
-            }
+    /**
+     * Retrieves all products belonging to a specific category.
+     * This involves a JOIN between Product and ProductCategory tables.
+     */
+    @GetMapping("/categories/{categoryId}/products")
+    public List<Product> getProductsByCategory(@PathVariable Long categoryId) {
+        return productRepository.findByCategoryId(categoryId);
+    }
+
+    /**
+     * Retrieves all orders for a specific user.
+     * This involves a JOIN between Orders and User tables.
+     */
+    @GetMapping("/users/{userId}/orders")
+    public List<Orders> getOrdersByUser(@PathVariable Long userId) {
+        return ordersRepository.findByUserId(userId);
+    }
+
+    /**
+     * A simple, fast query to get all products.
+     */
+    @GetMapping("/products")
+    public List<Product> getAllProducts() {
+        return productRepository.findAll();
+    }
+
+    // --- Test APIs for simulating different query patterns ---
+
+    /**
+     * Simulates a user rapidly browsing through all categories.
+     * Generates many small, fast SELECT queries.
+     */
+    @GetMapping("/test/rapid-browsing")
+    public String rapidBrowsing() {
+        for (long i = 1; i <= 3; i++) {
+            productRepository.findByCategoryId(i);
         }
+        return "Simulated rapid category browsing. Check the 3D dashboard.";
     }
 
-    @GetMapping("/users")
-    public List<User> getAllUsers() {
-        return userRepository.findAll();
-    }
-
-    @GetMapping("/users/{id}")
-    public User getUser(@PathVariable Long id) {
-        return userRepository.findById(id).orElse(null);
-    }
-
-    @GetMapping("/sensitive-data")
-    public List<SensitiveData> getAllSensitiveData() {
-        return sensitiveDataRepository.findAll();
-    }
-
-    // --- 테스트용 API: 대시보드에서 시각적으로 이상 징후를 확인하기 위함 ---
-
-    @GetMapping("/test/abnormal-access")
-    public String abnormalAccess() {
-        for (int i = 0; i < 20; i++) {
-            userRepository.findAll();
-        }
-        return "Simulated abnormal access (20 queries). Check the 3D dashboard.";
-    }
-
-    @GetMapping("/test/massive-query")
-    public String massiveQuery() {
-        sensitiveDataRepository.findAll();
-        return "Simulated massive query (100 rows). Check the 3D dashboard.";
+    /**
+     * Simulates a large, complex report query.
+     * In a real scenario, this would be a more complex query, but here we simulate it
+     * by fetching all products and all orders sequentially.
+     */
+    @GetMapping("/test/complex-report")
+    public String complexReport() {
+        productRepository.findAll();
+        ordersRepository.findAll();
+        return "Simulated complex report query. Check the 3D dashboard.";
     }
 }

@@ -8,8 +8,11 @@ spring:
     username: sa
     password:
   jpa:
+    hibernate:
+      ddl-auto: create-drop # Creates schema on startup, drops on shutdown
     properties:
       hibernate:
-        show_sql: true # Log SQL to the console
-        format_sql: true # Format the logged SQL
-        use_sql_comments: false # Optional: to make logs cleaner
+        show_sql: true
+        format_sql: true
+        use_sql_comments: false
+    defer-datasource-initialization: true # Ensures data.sql runs AFTER Hibernate creates schema
