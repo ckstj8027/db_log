@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <include resource="org/springframework/boot/logging/logback/base.xml"/>
+
+    <!-- Appender to capture SQL logs -->
+    <appender name="SQL_CAPTURE" class="com.example.db_log.p6spy.SqlLogCapture" />
+
+    <!-- Logger for Hibernate SQL -->
+    <logger name="org.hibernate.SQL" level="DEBUG" additivity="false">
+        <appender-ref ref="SQL_CAPTURE" />
+        <!-- You can also add a CONSOLE appender here if you want to see SQL in the console -->
+        <!-- <appender-ref ref="CONSOLE" /> -->
+    </logger>
+
+</configuration>

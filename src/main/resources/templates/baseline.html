@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Baseline Visualization</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <style>
+        body { font-family: sans-serif; margin: 2em; }
+        #lastUpdated { color: #555; font-style: italic; }
+    </style>
+</head>
+<body>
+<h1>Baseline 3D Visualization (Pattern-Based)</h1>
+<p id="lastUpdated">Last Updated: <span th:text="${lastUpdated}"></span></p>
+
+<div id="baselineChart"></div>
+
+<script th:inline="javascript">
+    /*<![CDATA[*/
+    const baselineData = /*[[${baselineData}]]*/ [];
+    const lastUpdated = /*[[${lastUpdated}]]*/ new Date().toLocaleString();
+
+    document.getElementById('lastUpdated').getElementsByTagName('span')[0].textContent = lastUpdated;
+
+    const patterns = baselineData.map(d => d.pattern);
+    const avgExecutionTimes = baselineData.map(d => d.avgExecutionTime);
+    const queryCounts = baselineData.map(d => d.queryCount);
+
+    const data = [{
+        x: patterns, // Use pattern for X-axis
+        y: avgExecutionTimes,
+        z: queryCounts,
+        text: patterns.map((name, i) => `Pattern: ${name}<br>Avg Time: ${avgExecutionTimes[i].toFixed(2)}ms<br>Count: ${queryCounts[i]}`),
+        hoverinfo: 'text',
+        mode: 'markers',
+        marker: {
+            size: 12,
+            color: avgExecutionTimes, // Color by execution time
+            colorscale: 'Portland',
+            showscale: true,
+            colorbar: {
+                title: 'Avg Time (ms)'
+            }
+        },
+        type: 'scatter3d'
+    }];
+
+    const layout = {
+        title: 'DB Query Baseline by Pattern',
+        margin: { l: 0, r: 0, b: 0, t: 40 },
+        scene: {
+            xaxis: {title: 'Query Pattern'},
+            yaxis: {title: 'Avg Execution Time (ms)'},
+            zaxis: {title: 'Query Count'}
+        }
+    };
+
+    Plotly.newPlot('baselineChart', data, layout);
+    /*]]>*/
+</script>
+</body>
+</html>
